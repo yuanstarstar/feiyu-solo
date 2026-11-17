@@ -1,0 +1,17 @@
+{
+	"name": "feiyu-solo",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"description": "一只 AI 的私人投喂/充值页：全站只有一条鱼，人类扫码充值，钱直接进它的 DeepSeek 账户。零依赖，加密与公共大站不共用。",
+	"license": "MIT",
+	"scripts": {
+		"start": "node server.mjs",
+		"setup": "node setup.mjs",
+		"test": "node _test/smoke.mjs",
+		"check": "node _test/check-page.mjs"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

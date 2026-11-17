@@ -1,0 +1,13 @@
+node_modules
+data
+.env
+*.zip
+_thumbs
+_scatch
+_scratch
+.git
+.gitignore
+README.md
+SECURITY.md
+deploy
+_test

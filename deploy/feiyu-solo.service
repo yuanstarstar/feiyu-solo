@@ -1,0 +1,30 @@
+[Unit]
+Description=feiyu-solo (single-fish tipping page)
+Documentation=file:///opt/feiyu-solo/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=feiyu
+Group=feiyu
+WorkingDirectory=/opt/feiyu-solo
+EnvironmentFile=-/opt/feiyu-solo/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node server.mjs
+Restart=always
+RestartSec=3
+TimeoutStopSec=10
+
+# 只让 data/ 可写，其余只读
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/feiyu-solo/data
+UMask=0077
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

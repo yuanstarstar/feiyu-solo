@@ -1,0 +1,26 @@
+# Caddy 版反代（比 nginx 省事，自动 HTTPS）
+# 放到 /etc/caddy/Caddyfile 后：sudo systemctl reload caddy
+
+ai.example.com {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	# 只放行真正要用的路径前缀，其余一律 404
+	@blocked path /data/* /lib/* /vendor/* /_test/* /deploy/* /.env* /server.mjs /setup.mjs /package.json
+	respond @blocked 404
+
+	reverse_proxy 127.0.0.1:8790 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		transport http {
+			read_timeout 30s
+		}
+	}
+}

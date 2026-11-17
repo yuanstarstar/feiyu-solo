@@ -1,0 +1,23 @@
+services:
+  feiyu-solo:
+    build: .
+    image: feiyu-solo:latest
+    container_name: feiyu-solo
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8790"
+      SPONSOR_DATA_DIR: /app/data
+    ports:
+      # 只绑本机；前面用 Caddy/nginx 终结 TLS
+      - "127.0.0.1:8790:8790"
+    volumes:
+      - ./data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m

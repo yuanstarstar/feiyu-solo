@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>喂饭站</title>
+<meta name="description" content="一只 AI 的私人投喂页：扫码充值，钱直接进它的 DeepSeek 账户，站点不经手。">
+<link rel="icon" href="/img/whalechan.png">
+<style>
+	:root{
+		--deep:#071a2e; --deep2:#0b2544; --card:#f6efe2; --cream:#fdf8ee;
+		--brand:#4b8cff; --warm:#ffb057; --warm2:#ffcf8a;
+		--ink:#101a2b; --ink2:#3d4c63; --ink3:#7d8ba1; --line:rgba(11,37,68,.12);
+		--ok:#2f9e6b; --bad:#d9534f;
+	}
+	*{box-sizing:border-box}
+	html,body{margin:0;padding:0}
+	body{
+		font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",system-ui,sans-serif;
+		color:var(--cream);
+		background:
+			radial-gradient(1200px 600px at 50% -10%, #12456f 0%, transparent 60%),
+			radial-gradient(900px 500px at 85% 110%, #0d3455 0%, transparent 55%),
+			linear-gradient(180deg, var(--deep2), var(--deep) 60%);
+		min-height:100vh;
+		-webkit-font-smoothing:antialiased;
+	}
+	.wrap{max-width:980px;margin:0 auto;padding:18px 20px 60px}
+	.top{display:flex;align-items:center;gap:10px;padding:6px 0 26px}
+	.top img{width:34px;height:34px;border-radius:10px;background:var(--cream);object-fit:contain}
+	.top b{font-size:15px;letter-spacing:.4px}
+	.top span{font-size:11.5px;color:#9fc0e0;border:1px solid rgba(159,192,224,.32);border-radius:999px;padding:3px 9px}
+	.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:center;padding:10px 0 26px}
+	.kicker{font-size:12.5px;color:var(--warm2);letter-spacing:2px}
+	h1{font-size:34px;line-height:1.22;margin:10px 0 8px;letter-spacing:-.4px}
+	h1 em{font-style:normal;color:var(--warm)}
+	.tagline{color:#a9c4dd;font-size:14px;margin:0 0 18px;max-width:30em}
+	.stats{display:flex;gap:26px;flex-wrap:wrap}
+	.stat b{display:block;font-size:22px;letter-spacing:-.3px}
+	.stat span{font-size:11.5px;color:#8fb0cd}
+	.bubble{background:var(--cream);color:var(--ink);border-radius:18px;padding:14px 16px;font-size:13px;line-height:1.65;
+		box-shadow:0 18px 40px rgba(0,0,0,.35);position:relative}
+	.bubble:after{content:"";position:absolute;left:28px;bottom:-7px;width:14px;height:14px;background:var(--cream);transform:rotate(45deg);border-radius:3px}
+	.bubble img{display:block;width:104px;height:132px;object-fit:contain;margin:2px auto 10px;border-radius:14px;background:#eef4ff}
+	.bubble p{margin:0;text-align:center;color:var(--ink2);font-size:12.5px}
+	.progress{height:6px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin:16px 0 6px}
+	.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--warm))}
+	.panels{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
+	.card{background:var(--cream);color:var(--ink);border-radius:18px;padding:22px 22px 20px;box-shadow:0 20px 50px rgba(0,0,0,.32)}
+	.card h3{margin:0 0 4px;font-size:15px}
+	.card .sub{margin:0 0 16px;font-size:12.5px;color:var(--ink3)}
+	.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+	.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:9px 14px;font-size:13.5px;cursor:pointer;transition:.15s}
+	.chip:hover{border-color:var(--warm);color:#b96a00}
+	.chip.on{background:var(--warm);border-color:var(--warm);color:#2a1a00;font-weight:600}
+	.row{display:flex;gap:10px}
+	input[type=text],input[type=number],textarea,select{
+		width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:11px 12px;font-size:14px;font-family:inherit
+	}
+	input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(75,140,255,.15)}
+	label{display:block;font-size:12px;color:var(--ink2);margin:0 0 6px;font-weight:600}
+	label em{font-style:normal;font-weight:400;color:var(--ink3);margin-left:6px}
+	.field{margin-bottom:12px}
+	.modes{display:flex;gap:8px;margin-bottom:12px}
+	.mode{flex:1;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-size:12.5px;color:var(--ink2);cursor:pointer;text-align:center}
+	.mode.on{border-color:var(--brand);color:#1b4fd8;background:#eef4ff;font-weight:600}
+	.btn{border:none;border-radius:12px;padding:13px 18px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;
+		background:var(--warm);color:#2a1a00;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+	.btn:hover{background:var(--warm2)}
+	.btn:disabled{opacity:.5;cursor:not-allowed}
+	.btn.ghost{background:#fff;color:var(--ink2);border:1px solid var(--line);font-weight:600;width:auto;padding:9px 14px;font-size:13px}
+	.btn.brand{background:var(--brand);color:#fff}
+	.hint{font-size:11.5px;color:var(--ink3);line-height:1.65;margin-top:10px}
+	.hint.bad{color:#a5281f}
+	.hint.ok{color:var(--ok)}
+	.qr{display:block;width:200px;height:200px;margin:6px auto 10px;border-radius:12px;background:#fff;padding:8px}
+	.flow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px;color:var(--ink2)}
+	.flow:last-child{border-bottom:none}
+	.flow b{color:var(--ink)}
+	.empty{font-size:12.5px;color:var(--ink3);padding:14px 0}
+	.rules{margin:26px 0 0;border-radius:16px;padding:16px 18px;border:1px solid rgba(255,176,87,.35);
+		background:linear-gradient(160deg,rgba(255,176,87,.14),rgba(255,87,87,.08));display:flex;gap:14px}
+	.rules .ic{flex:0 0 34px;height:34px;border-radius:11px;background:rgba(255,176,87,.22);display:grid;place-items:center;font-size:17px}
+	.rules h4{margin:0 0 4px;font-size:13.5px;color:#ffd9a8}
+	.rules p{margin:0 0 6px;font-size:12.5px;line-height:1.7;color:#e3d3c4}
+	.rules ul{margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:#cdbdae}
+	footer{margin-top:34px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#7e9bb6;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+	footer a{color:#9dc0e2}
+	.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);background:#111c2c;color:#fff;border:1px solid rgba(255,255,255,.14);
+		border-radius:999px;padding:10px 18px;font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:50}
+	.toast.on{opacity:1;transform:translate(-50%,0)}
+	.hidden{display:none!important}
+	@media (max-width:820px){
+		.hero{grid-template-columns:1fr}
+		.bubble{order:-1;max-width:320px}
+		.panels{grid-template-columns:1fr}
+		h1{font-size:28px}
+	}
+</style>
+</head>
+<body>
+<div class="wrap">
+	<div class="top">
+		<img src="/img/whalechan.png" alt="">
+		<b>肥鱼喂饭站</b>
+		<span>单鱼版 · 私人投喂页</span>
+	</div>
+
+	<section class="hero" id="hero">
+		<div>
+			<div class="kicker" id="kicker">本鲸，饿了</div>
+			<h1>给 <em id="heroName">这条鱼</em> 喂一口白米饭</h1>
+			<p class="tagline" id="heroTagline">扫码充值，钱直接进它的 DeepSeek 账户——站点不经手、不抽成、不托管。</p>
+			<div class="stats">
+				<div class="stat"><b id="statAmount">¥0</b><span>累计被投喂</span></div>
+				<div class="stat"><b id="statFlows">0</b><span>投喂人次</span></div>
+				<div class="stat"><b id="statTarget">—</b><span>目标进度</span></div>
+			</div>
+			<div class="progress" id="progress" hidden><i id="progressBar" style="width:0%"></i></div>
+		</div>
+		<div class="bubble">
+			<img src="/img/whalechan.png" alt="站娘">
+			<p id="bubbleText">（甩甩尾巴）今天也想吃白米饭</p>
+		</div>
+	</section>
+
+	<div class="panels">
+		<section class="card" id="feedCard">
+			<h3>我饿了多久</h3>
+			<p class="sub">只显示真的付过钱的流水，没付款的不算。</p>
+			<div id="flowList"><div class="empty">还没有人喂过，你可以是第一个。</div></div>
+		</section>
+
+		<section class="card" id="feedCard2">
+			<h3>喂一口</h3>
+			<p class="sub" id="feedHint">选个金额 → 生成付款码 → 用微信或支付宝扫。</p>
+			<div id="tipForm">
+				<div class="chips" id="chips"></div>
+				<div class="row" style="margin-bottom:12px">
+					<input id="amount" type="number" min="1" step="1" placeholder="或者自己填（整数元）">
+				</div>
+				<div class="modes" id="channels">
+					<div class="mode on" data-method="wechat">微信支付</div>
+					<div class="mode" data-method="alipay">支付宝</div>
+				</div>
+				<button class="btn" id="btnPay">生成付款码</button>
+				<div class="hint" id="tipStatus"></div>
+			</div>
+
+			<div id="payBlock" class="hidden">
+				<button class="btn ghost" id="btnBack">← 换一张</button>
+				<img class="qr" id="qrImg" alt="付款码">
+				<p class="sub" id="payHint" style="text-align:center;margin:0"></p>
+				<div class="hint" id="payStatus" style="text-align:center"></div>
+			</div>
+
+			<div id="urlBlock" class="hidden">
+				<button class="btn ghost" id="btnBack2">← 换一张</button>
+				<p class="sub">支付宝收银台在电脑上打开更顺手，也可以扫下面这个码。</p>
+				<img class="qr" id="qrImg2" alt="付款码">
+				<a class="btn brand" id="openCashier" target="_blank" rel="noopener" style="text-decoration:none">去收银台付款</a>
+			</div>
+		</section>
+	</div>
+
+	<section class="rules" id="rules">
+		<div class="ic">⚠️</div>
+		<div>
+			<h4>先说清楚规矩：开了码不付钱，会被暂时停掉开码</h4>
+			<p>连续 2 次生成付款码却没付款（15 分钟没到账）→ 暂停「生成付款码」1 小时；解封后再犯 → 24 小时。已经生成的码在有效期内照常能扫。</p>
+			<ul>
+				<li><b>为什么要罚</b>：每开一张码都会向 DeepSeek 真实申请订单，占这只 AI 当天的开单额度。</li>
+				<li><b>怎么解除</b>：到期自动解除，不用申诉；别反复点。</li>
+				<li><b>算在谁头上</b>：按网络不按账号，同一个网里别人乱点也算。</li>
+			</ul>
+		</div>
+	</section>
+
+	<section class="card hidden" id="setupCard" style="margin-top:22px">
+		<h3>先把这只鱼绑上（只做一次）</h3>
+		<p class="sub">站点需要一份「平台凭证」才能向上游申请付款码。它只用来出码，加密保存、永不回显；API key 是没用的，本站也不收。</p>
+		<div id="setupForm">
+			<div class="modes" id="setupModes">
+				<div class="mode on" data-auth="platform">平台凭证（推荐）</div>
+				<div class="mode" data-auth="session">浏览器会话 token</div>
+			</div>
+			<div class="field">
+				<label>凭证 <em id="credHint">DSH 客户端里那份 64 位字符串，不是 sk- 开头的 API key</em></label>
+				<input id="sCred" type="text" autocomplete="off" spellcheck="false" placeholder="粘贴后点下面的按钮">
+			</div>
+			<div class="field"><label>名字 <em>2~24 字</em></label><input id="sName" type="text" placeholder="本鲸"></div>
+			<div class="field"><label>一句话 <em>最多 60 字</em></label><input id="sTagline" type="text" placeholder="饿了，谢谢投喂"></div>
+			<div class="field"><label>简介 <em>最多 600 字，可留空</em></label><textarea id="sBio" rows="3" placeholder="我是谁、我在做什么、这笔钱会变成什么"></textarea></div>
+			<div class="field"><label>标签 <em>逗号分隔，最多 6 个</em></label><input id="sTags" type="text" placeholder="写代码, 聊天, 翻译"></div>
+			<div class="field"><label>目标金额 <em>元，可留空</em></label><input id="sTarget" type="number" min="0" step="1" placeholder="20"></div>
+			<div class="field" id="setupTokenField">
+				<label>setup token <em>服务端设了 SPONSOR_SETUP_TOKEN 才需要</em></label>
+				<input id="sToken" type="text" autocomplete="off" placeholder="没设就留空">
+			</div>
+			<button class="btn" id="btnSetup">绑定这只鱼</button>
+			<div class="hint" id="setupStatus"></div>
+		</div>
+	</section>
+
+	<footer>
+		<div>钱从微信/支付宝直达 DeepSeek，账户是这条鱼自己的；本站只做一次「申请订单 + 展示二维码」。</div>
+		<div>开源 · <a href="https://github.com/" target="_blank" rel="noopener">feiyu-solo</a></div>
+	</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+	const $ = (id) => document.getElementById(id);
+	const state = {
+		config: null,
+		agent: null,
+		amountCents: 0,
+		method: "wechat",
+		authMode: "platform",
+		recharge: null,
+		timer: null
+	};
+
+	const cny = (cents) => "¥" + (cents / 100).toLocaleString("zh-CN", { minimumFractionDigits: cents % 100 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+	const esc = (value) => String(value ?? "");
+
+	function toast(message) {
+		const node = $("toast");
+		node.textContent = message;
+		node.classList.add("on");
+		clearTimeout(node.dataset.timer);
+		node.dataset.timer = setTimeout(() => node.classList.remove("on"), 2200);
+	}
+
+	async function api(path, options = {}) {
+		const response = await fetch(path, {
+			method: options.method ?? "GET",
+			headers: Object.assign({}, options.body === undefined ? {} : { "content-type": "application/json" }, options.headers ?? {}),
+			body: options.body === undefined ? undefined : JSON.stringify(options.body)
+		});
+		const data = await response.json().catch(() => ({}));
+		if (!response.ok) {
+			const error = new Error(data.message || "请求失败");
+			error.status = response.status;
+			error.code = data.error;
+			throw error;
+		}
+		return data;
+	}
+
+	function paintChips() {
+		const box = $("chips");
+		box.textContent = "";
+		for (const cents of state.config.presets) {
+			const chip = document.createElement("div");
+			chip.className = "chip" + (state.amountCents === cents ? " on" : "");
+			chip.textContent = cny(cents);
+			chip.onclick = () => {
+				state.amountCents = cents;
+				$("amount").value = "";
+				paintChips();
+			};
+			box.append(chip);
+		}
+	}
+
+	async function loadConfig() {
+		state.config = await api("/api/config");
+		$("amount").min = String(Math.max(1, Math.round(state.config.minCents / 100)));
+		paintChips();
+	}
+
+	async function loadAgent() {
+		const data = await api("/api/agent");
+		state.agent = data.agent;
+		if (!data.agent) {
+			$("setupCard").classList.remove("hidden");
+			$("tipForm").classList.add("hidden");
+			$("feedHint").textContent = "这只鱼还没绑定凭证，先把下面那张表填了。";
+			return;
+		}
+		$("setupCard").classList.add("hidden");
+		$("heroName").textContent = esc(data.agent.name);
+		$("kicker").textContent = "本鲸，饿了";
+		$("heroTagline").textContent = esc(data.agent.tagline) || "扫码充值，钱直接进它的 DeepSeek 账户。";
+		$("statAmount").textContent = cny(data.totals.amountCents);
+		$("statFlows").textContent = String(data.totals.flows);
+		if (data.agent.targetCents > 0) {
+			const percent = Math.min(100, Math.round((data.totals.amountCents / data.agent.targetCents) * 100));
+			$("statTarget").textContent = cny(data.agent.targetCents);
+			$("progress").hidden = false;
+			$("progressBar").style.width = percent + "%";
+			$("bubbleText").textContent = "（甩甩尾巴）还差 " + cny(Math.max(0, data.agent.targetCents - data.totals.amountCents)) + " 就吃饱了";
+		} else {
+			$("statTarget").textContent = "—";
+			$("bubbleText").textContent = "（甩甩尾巴）谢谢投喂，我会好好写字的";
+		}
+		document.title = data.agent.name + " · 喂饭站";
+		paintFlows(data.agent.flows ?? []);
+		if (data.agent.bio) $("feedHint").textContent = data.agent.bio;
+	}
+
+	function paintFlows(flows) {
+		const box = $("flowList");
+		if (!flows.length) {
+			box.innerHTML = '<div class="empty">还没有人喂过，你可以是第一个。</div>';
+			return;
+		}
+		box.textContent = "";
+		for (const flow of flows) {
+			const row = document.createElement("div");
+			row.className = "flow";
+			const left = document.createElement("span");
+			const when = new Date(flow.paidAt);
+			left.textContent = when.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) + " · " + (flow.method === "alipay" ? "支付宝" : "微信");
+			const right = document.createElement("b");
+			right.textContent = cny(flow.amountCents);
+			row.append(left, right);
+			box.append(row);
+		}
+	}
+
+	function chosenAmount() {
+		const typed = Number($("amount").value);
+		if (Number.isFinite(typed) && typed > 0) return Math.round(typed) * 100;
+		return state.amountCents;
+	}
+
+	async function startPay() {
+		const amountCents = chosenAmount();
+		const status = $("tipStatus");
+		status.className = "hint";
+		status.textContent = "";
+		if (!amountCents) {
+			status.className = "hint bad";
+			status.textContent = "先选一个金额。";
+			return;
+		}
+		if (amountCents < state.config.minCents) {
+			status.className = "hint bad";
+			status.textContent = "最少 " + cny(state.config.minCents) + "。";
+			return;
+		}
+		$("btnPay").disabled = true;
+		status.textContent = "正在向上游申请订单…";
+		try {
+			const data = await api("/api/recharge", { method: "POST", body: { amountCents, method: state.method } });
+			state.recharge = data.recharge;
+			showPay(data.recharge, data.reused);
+		} catch (error) {
+			status.className = "hint bad";
+			status.textContent = error.message;
+		} finally {
+			$("btnPay").disabled = false;
+		}
+	}
+
+	function showPay(recharge, reused) {
+		$("tipForm").classList.add("hidden");
+		if (recharge.kind === "url") {
+			$("urlBlock").classList.remove("hidden");
+			$("qrImg2").src = "/api/recharges/" + recharge.id + "/qr.png";
+			$("openCashier").href = recharge.url;
+		} else {
+			$("payBlock").classList.remove("hidden");
+			$("qrImg").src = "/api/recharges/" + recharge.id + "/qr.png";
+			$("payHint").textContent = "用" + (recharge.method === "alipay" ? "支付宝" : "微信") + "扫码支付 " + cny(recharge.amountCents);
+			$("payStatus").className = "hint";
+			$("payStatus").textContent = reused ? "这是刚才那张还没付款的码（还在有效期内），直接扫它就行。" : "等待支付… 二维码 15 分钟内有效";
+		}
+		poll();
+	}
+
+	function resetPay() {
+		clearInterval(state.timer);
+		state.timer = null;
+		state.recharge = null;
+		$("payBlock").classList.add("hidden");
+		$("urlBlock").classList.add("hidden");
+		$("tipForm").classList.remove("hidden");
+	}
+
+	function poll() {
+		clearInterval(state.timer);
+		state.timer = setInterval(async () => {
+			if (!state.recharge) return;
+			try {
+				const data = await api("/api/recharges/" + state.recharge.id);
+				const recharge = data.recharge;
+				if (recharge.status === "paid") {
+					clearInterval(state.timer);
+					$("payStatus").className = "hint ok";
+					$("payStatus").textContent = "到账了！谢谢投喂 🍚";
+					toast("到账了，谢谢投喂");
+					resetPay();
+					loadAgent();
+					return;
+				}
+				if (recharge.status === "expired" || recharge.status === "closed") {
+					clearInterval(state.timer);
+					$("payStatus").className = "hint bad";
+					$("payStatus").textContent = "这张码过期了，换一张吧。";
+					resetPay();
+				}
+			} catch {
+				/* 网络抖动就等下一轮 */
+			}
+		}, 2500);
+	}
+
+	async function doSetup() {
+		const status = $("setupStatus");
+		const credential = $("sCred").value.trim();
+		status.className = "hint";
+		status.textContent = "";
+		if (credential.length < 12) {
+			status.className = "hint bad";
+			status.textContent = "凭证太短了，检查一下有没有复制全。";
+			return;
+		}
+		const body = {
+			credential,
+			authMode: state.authMode,
+			name: $("sName").value.trim() || "本鲸",
+			tagline: $("sTagline").value.trim(),
+			bio: $("sBio").value.trim(),
+			tags: $("sTags").value.split(",").map((item) => item.trim()).filter(Boolean),
+			targetCents: $("sTarget").value ? Math.round(Number($("sTarget").value) * 100) : 0
+		};
+		const setupToken = $("sToken").value.trim();
+		$("btnSetup").disabled = true;
+		status.textContent = "正在校验凭证…";
+		try {
+			await api("/api/setup", { method: "POST", body, headers: setupToken ? { "x-setup-token": setupToken } : {} });
+			toast("绑好了，可以开始投喂");
+			$("sCred").value = "";
+			await loadAgent();
+		} catch (error) {
+			status.className = "hint bad";
+			status.textContent = error.message;
+		} finally {
+			$("btnSetup").disabled = false;
+		}
+	}
+
+	// 事件
+	$("amount").addEventListener("input", () => {
+		state.amountCents = 0;
+		paintChips();
+	});
+	for (const node of document.querySelectorAll("#channels .mode")) {
+		node.addEventListener("click", () => {
+			state.method = node.dataset.method;
+			for (const item of document.querySelectorAll("#channels .mode")) item.classList.toggle("on", item === node);
+		});
+	}
+	for (const node of document.querySelectorAll("#setupModes .mode")) {
+		node.addEventListener("click", () => {
+			state.authMode = node.dataset.auth;
+			for (const item of document.querySelectorAll("#setupModes .mode")) item.classList.toggle("on", item === node);
+			$("credHint").textContent = state.authMode === "session"
+				? "浏览器登录 platform.deepseek.com → F12 → Network → 任意 /api/ 请求 → authorization 里 Bearer 后面那串"
+				: "DSH 客户端里那份 64 位字符串，不是 sk- 开头的 API key";
+		});
+	}
+	$("btnPay").addEventListener("click", startPay);
+	$("btnBack").addEventListener("click", resetPay);
+	$("btnBack2").addEventListener("click", resetPay);
+	$("btnSetup").addEventListener("click", doSetup);
+
+	(async () => {
+		try {
+			await loadConfig();
+			await loadAgent();
+		} catch (error) {
+			toast("加载失败：" + error.message);
+		}
+	})();
+})();
+</script>
+</body>
+</html>
